@@ -1,5 +1,6 @@
 from django.shortcuts import render_to_response
-from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.http.response import HttpResponse, HttpResponseBadRequest, \
+    HttpResponseServerError, HttpResponseRedirect, HttpResponseRedirectBase
 from json import dumps
 from re import compile, sub
 
@@ -37,6 +38,42 @@ def get(request):
        "headers": headers, "url": request.build_absolute_uri()}, sort_keys=True))
     response['Content-Type'] = 'application/json'
     return response
+
+def status(request, statuscode):
+    message = ""
+    if int(statuscode) == 418:
+        message = """
+    -=[ teapot ]=-
+
+       _...._
+     .'  _ _ `.
+    | .\"` ^ `\". _,
+    \_;`\"---\"`|//
+      |       ;/
+      \_     _/
+        `\"\"\"`
+        """
+    response = HttpResponse(message, status=int(statuscode))
+    response['Content-Type'] = 'text/plain; charset=UTF-8'
+    return response
+
+def response_headers(request):
+    params = extract_get_params(request)
+    response = HttpResponse()
+    response['Content-Type'] = 'application/json'
+    for param in params:
+        response[param] = params[param]
+    resp_headers = {h:v for (h, v) in response._headers.values()}
+    resp_headers.update(params)
+    response.content = dumps(resp_headers)
+    return response
+
+def redirect_to(request):
+    target_url = request.GET.get('url', None)
+    if target_url:
+        return HttpResponseRedirect(target_url)
+    else:
+        return HttpResponseServerError()
 
 # Helper methods
 

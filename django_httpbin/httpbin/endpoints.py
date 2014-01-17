@@ -8,4 +8,7 @@ urlpatterns = patterns('',
     (r'^/user-agent$', views.user_agent),
     (r'^/headers$', views.headers),
     (r'^/get$', views.get),
+    (r'^/status/(\d+)$', views.status),
+    (r'^/response-headers$', views.response_headers),
+    (r'^/redirect-to$', views.redirect_to)
 )
